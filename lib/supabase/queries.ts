@@ -77,23 +77,33 @@ export async function insertDigestItems(
   digestId: string,
   items: ScoredItem[],
 ): Promise<void> {
-  const rows = items.map((item) => ({
-    digest_id: digestId,
-    source: item.source,
-    external_id: item.externalId,
-    title: item.title,
-    url: item.url,
-    body: item.body ?? null,
-    author: item.author ?? null,
-    source_score: item.score ?? null,
-    comment_count: item.commentCount ?? null,
-    published_at: item.publishedAt,
-    personal_relevance: item.personalRelevance,
-    public_interest: item.publicInterest,
-    scoring_rationale: item.scoringRationale,
-    comment_angle: item.commentAngle ?? null,
-    metadata: item.metadata ?? null,
-  }));
+  // Deduplicate by (source, external_id) to avoid Postgres
+  // "ON CONFLICT DO UPDATE cannot affect row a second time" error
+  const seen = new Set<string>();
+  const rows = items
+    .filter((item) => {
+      const key = `${item.source}:${item.externalId}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((item) => ({
+      digest_id: digestId,
+      source: item.source,
+      external_id: item.externalId,
+      title: item.title,
+      url: item.url,
+      body: item.body ?? null,
+      author: item.author ?? null,
+      source_score: item.score ?? null,
+      comment_count: item.commentCount ?? null,
+      published_at: item.publishedAt,
+      personal_relevance: item.personalRelevance,
+      public_interest: item.publicInterest,
+      scoring_rationale: item.scoringRationale,
+      comment_angle: item.commentAngle ?? null,
+      metadata: item.metadata ?? null,
+    }));
 
   const { error } = await db()
     .from('digest_items')

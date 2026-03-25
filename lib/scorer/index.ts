@@ -72,16 +72,24 @@ async function scoreBatch(
   client: Anthropic,
   items: RawItem[],
 ): Promise<ScoredItem[]> {
-  const requests = items.map((item) => ({
-    custom_id: sanitizeCustomId(item.id),
-    params: {
-      model: MODEL,
-      max_tokens: 256,
-      temperature: 0,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user' as const, content: buildUserMessage(item) }],
-    },
-  }));
+  // Deduplicate by custom_id to avoid batch rejection
+  const seen = new Set<string>();
+  const requests: { custom_id: string; params: { model: string; max_tokens: number; temperature: number; system: string; messages: { role: 'user'; content: string }[] } }[] = [];
+  for (const item of items) {
+    const cid = sanitizeCustomId(item.id);
+    if (seen.has(cid)) continue;
+    seen.add(cid);
+    requests.push({
+      custom_id: cid,
+      params: {
+        model: MODEL,
+        max_tokens: 256,
+        temperature: 0,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user' as const, content: buildUserMessage(item) }],
+      },
+    });
+  }
 
   const batch = await client.messages.batches.create({ requests });
   console.log(`[scorer] batch created: ${batch.id}`);
