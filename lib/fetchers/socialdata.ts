@@ -8,7 +8,7 @@ interface Tweet {
   user: { screen_name: string };
   retweet_count: number;
   favorite_count: number;
-  created_at: string;
+  tweet_created_at: string;
 }
 
 export async function fetchTwitter(): Promise<RawItem[]> {
@@ -66,7 +66,7 @@ async function searchTweets(
   const data = await res.json();
   const tweets: Tweet[] = data.tweets ?? [];
 
-  return tweets.map((tweet) => ({
+  return tweets.filter((tweet) => tweet.id_str && tweet.full_text).map((tweet) => ({
     id: `twitter:${tweet.id_str}`,
     source: 'twitter' as const,
     externalId: tweet.id_str,
@@ -76,6 +76,19 @@ async function searchTweets(
     author: tweet.user.screen_name,
     score: tweet.favorite_count,
     commentCount: tweet.retweet_count,
-    publishedAt: new Date(tweet.created_at).toISOString(),
+    publishedAt: safeDateParse(tweet.tweet_created_at),
   }));
+}
+
+function safeDateParse(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) return d.toISOString();
+  // Twitter format: "Mon Mar 24 12:00:00 +0000 2026"
+  const parts = dateStr.split(' ');
+  if (parts.length >= 6) {
+    const reordered = `${parts[1]} ${parts[2]}, ${parts[5]} ${parts[3]} ${parts[4]}`;
+    const d2 = new Date(reordered);
+    if (!isNaN(d2.getTime())) return d2.toISOString();
+  }
+  return new Date().toISOString();
 }

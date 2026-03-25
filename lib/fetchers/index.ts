@@ -60,3 +60,11 @@ function normalizeUrl(url: string): string {
     return url;
   }
 }
+
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop()!)) {
+  fetchAllSources().then((items) => {
+    console.log(`Total items: ${items.length}`);
+    const bySrc = items.reduce((acc, i) => { acc[i.source] = (acc[i.source] || 0) + 1; return acc; }, {} as Record<string, number>);
+    console.table(bySrc);
+  }).catch(console.error);
+}

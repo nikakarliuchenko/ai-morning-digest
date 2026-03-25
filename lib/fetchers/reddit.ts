@@ -9,7 +9,11 @@ const SUBREDDITS = [
   'artificial',
 ];
 
-const parser = new XMLParser({ ignoreAttributes: false });
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  htmlEntities: true,
+  processEntities: false,
+});
 
 export async function fetchReddit(): Promise<RawItem[]> {
   const items: RawItem[] = [];
