@@ -54,7 +54,10 @@ async function searchTweets(
   apiKey: string,
   query: string,
 ): Promise<RawItem[]> {
-  const params = new URLSearchParams({ query, type: 'Latest' });
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+  const params = new URLSearchParams({ query: `${query} since:${since}`, type: 'Latest' });
   const res = await fetch(`${SOCIALDATA_URL}?${params}`, {
     headers: { Authorization: `Bearer ${apiKey}` },
   });

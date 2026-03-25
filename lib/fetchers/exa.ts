@@ -81,19 +81,26 @@ async function searchExa(
   const data = await res.json();
   const results: ExaResult[] = data.results ?? [];
 
-  return results.map((r) => {
-    const slug = r.url.split('/').filter(Boolean).pop() ?? r.id;
+  const cutoff = Date.now() - 48 * 60 * 60 * 1000; // 48h buffer
 
-    return {
-      id: `exa:${slug}`,
-      source: 'exa' as const,
-      externalId: slug,
-      title: r.title || r.url,
-      url: r.url,
-      body: r.text?.slice(0, 1000) ?? undefined,
-      author: r.author ?? undefined,
-      publishedAt: r.publishedDate ?? new Date().toISOString(),
-      metadata: { exaScore: r.score },
-    };
-  });
+  return results
+    .filter((r) => {
+      if (!r.publishedDate) return true; // keep if unknown, scorer will handle
+      return new Date(r.publishedDate).getTime() >= cutoff;
+    })
+    .map((r) => {
+      const slug = r.url.split('/').filter(Boolean).pop() ?? r.id;
+
+      return {
+        id: `exa:${slug}`,
+        source: 'exa' as const,
+        externalId: slug,
+        title: r.title || r.url,
+        url: r.url,
+        body: r.text?.slice(0, 1000) ?? undefined,
+        author: r.author ?? undefined,
+        publishedAt: r.publishedDate ?? new Date().toISOString(),
+        metadata: { exaScore: r.score },
+      };
+    });
 }

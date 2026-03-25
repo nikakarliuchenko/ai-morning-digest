@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { RawItem, ScoredItem } from '@/types';
 
 const MODEL = 'claude-haiku-4-5-20251001';
-const MAX_BATCH_WAIT_MS = 5 * 60 * 1000; // 5 min
+const MAX_BATCH_WAIT_MS = 10 * 60 * 1000; // 10 min
 const POLL_INTERVAL_MS = 10_000;
 
 const SYSTEM_PROMPT = `You are an AI content scorer for a daily developer digest. Score for a developer who:
