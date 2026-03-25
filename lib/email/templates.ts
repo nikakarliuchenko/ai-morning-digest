@@ -112,12 +112,14 @@ export function publicDigestHtml(
   date: string,
   items: DigestItemRow[],
 ): string {
-  const top = items
+  const filtered = items.filter((i) => i.author !== 'ClaudeAI-mod-bot');
+
+  const top = filtered
     .filter((i) => i.public_interest >= 6)
     .sort((a, b) => b.public_interest - a.public_interest)
     .slice(0, 20);
 
-  const highlights = top.filter((i) => i.public_interest >= 8);
+  const highlights = top.filter((i) => i.public_interest >= 8).slice(0, 10);
   const notable = top.filter((i) => i.public_interest >= 6 && i.public_interest < 8);
 
   let body = `<div class="header">
@@ -156,11 +158,14 @@ export function personalDigestHtml(
   date: string,
   items: DigestItemRow[],
 ): string {
-  const personal = items
-    .filter((i) => i.personal_relevance >= 7)
-    .sort((a, b) => b.personal_relevance - a.personal_relevance);
+  const filtered = items.filter((i) => i.author !== 'ClaudeAI-mod-bot');
 
-  const publicTop = items
+  const personal = filtered
+    .filter((i) => i.personal_relevance >= 7)
+    .sort((a, b) => b.personal_relevance - a.personal_relevance)
+    .slice(0, 20);
+
+  const publicTop = filtered
     .filter((i) => i.public_interest >= 7 && i.personal_relevance < 7)
     .sort((a, b) => b.public_interest - a.public_interest)
     .slice(0, 10);
