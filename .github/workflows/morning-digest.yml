@@ -1,0 +1,36 @@
+name: Morning Digest
+
+on:
+  schedule:
+    # 8 AM EST = 13:00 UTC (EDT = 12:00 UTC, but cron uses fixed UTC)
+    - cron: '0 13 * * *'
+  workflow_dispatch: # manual trigger
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run digest pipeline
+        run: npx tsx scripts/run-pipeline.ts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SOCIALDATA_API_KEY: ${{ secrets.SOCIALDATA_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          YOUR_EMAIL: ${{ secrets.YOUR_EMAIL }}
+          PIPELINE_SECRET: ${{ secrets.PIPELINE_SECRET }}
