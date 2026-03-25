@@ -27,9 +27,10 @@ export async function fetchAllSources(): Promise<RawItem[]> {
   });
 
   const deduped = deduplicateByUrl(all);
-  console.log(`[fetchers] total: ${all.length} raw → ${deduped.length} deduped`);
+  const capped = deduped.slice(0, 150);
+  console.log(`[fetchers] total: ${all.length} raw → ${deduped.length} deduped → ${capped.length} capped`);
 
-  return deduped;
+  return capped;
 }
 
 function deduplicateByUrl(items: RawItem[]): RawItem[] {
