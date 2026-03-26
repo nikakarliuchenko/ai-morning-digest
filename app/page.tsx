@@ -79,9 +79,10 @@ function DigestItem({ item }: { item: DigestItemRow }) {
         )}
       </div>
       <p className="mt-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-        {item.scoring_rationale.length > 120
-          ? item.scoring_rationale.slice(0, 120) + '\u2026'
-          : item.scoring_rationale}
+        {(() => {
+          const text = item.public_rationale ?? item.scoring_rationale;
+          return text.length > 120 ? text.slice(0, 120) + '\u2026' : text;
+        })()}
       </p>
     </div>
   );

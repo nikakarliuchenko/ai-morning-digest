@@ -5,14 +5,15 @@ const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_BATCH_WAIT_MS = 10 * 60 * 1000; // 10 min
 const POLL_INTERVAL_MS = 10_000;
 
-const SYSTEM_PROMPT = `You are an AI content scorer for a daily developer digest. Score for a developer who:
+const SYSTEM_PROMPT = `You are an AI content scorer for a daily developer digest. You score each item from TWO perspectives.
+
+== PERSONAL PERSPECTIVE ==
+Score for a specific developer who:
 - Builds production apps with Next.js and TypeScript
 - Uses Contentful as a headless CMS
 - Works with AI tools (Claude, GPT, Cursor, v0) daily
 - Builds AI-powered features and integrations
 - Is active on Reddit/X, building in public
-
-Provide TWO scores:
 
 PERSONAL_RELEVANCE (0-10): How useful for this specific developer?
   9-10: Directly impacts their stack (Next.js updates, Claude API changes, Contentful)
@@ -21,20 +22,24 @@ PERSONAL_RELEVANCE (0-10): How useful for this specific developer?
   1-3: Tangentially related
   0: Irrelevant
 
-PUBLIC_INTEREST (0-10): How interesting to any AI-curious developer?
+== PUBLIC PERSPECTIVE ==
+Score for any AI-curious developer. Do NOT reference any specific stack (no Next.js, Contentful, etc.).
+
+PUBLIC_INTEREST (0-10): How interesting to any developer building with AI?
   9-10: Major announcement, breakthrough, viral discussion
   7-8: Noteworthy development, insightful thread, practical tutorial
   4-6: Moderate industry news
   1-3: Niche or low-signal
   0: Spam
 
+== SHARED GUIDANCE ==
 Score higher for: actionable today, practitioner-specific, early signal on emerging tools, honest trade-off discussions.
 Score lower for: funding news, generic opinion pieces, hype without substance.
 
 If PERSONAL_RELEVANCE >= 7, provide COMMENT_ANGLE: a specific suggestion for how the developer could engage publicly, referencing their Next.js/AI/Contentful expertise.
 
 Respond in JSON only:
-{"personal_relevance": <int>, "public_interest": <int>, "rationale": "<one sentence>", "comment_angle": "<suggestion or null>"}`;
+{"personal_relevance": <int>, "public_interest": <int>, "personal_rationale": "<one sentence from personal perspective>", "public_rationale": "<one sentence explaining why this is interesting to any developer building with AI>", "comment_angle": "<suggestion or null>"}`;
 
 function buildUserMessage(item: RawItem): string {
   const parts = [
@@ -199,7 +204,8 @@ function parseScoreResponse(text: string, item: RawItem): ScoredItem | null {
       ...item,
       personalRelevance,
       publicInterest,
-      scoringRationale: String(parsed.rationale ?? ''),
+      scoringRationale: String(parsed.personal_rationale ?? parsed.rationale ?? ''),
+      publicRationale: String(parsed.public_rationale ?? parsed.rationale ?? ''),
       commentAngle: parsed.comment_angle ?? undefined,
     };
   } catch {

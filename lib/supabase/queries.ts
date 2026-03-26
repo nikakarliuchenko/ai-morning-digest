@@ -101,6 +101,7 @@ export async function insertDigestItems(
       personal_relevance: item.personalRelevance,
       public_interest: item.publicInterest,
       scoring_rationale: item.scoringRationale,
+      public_rationale: item.publicRationale,
       comment_angle: item.commentAngle ?? null,
       metadata: item.metadata ?? null,
     }));

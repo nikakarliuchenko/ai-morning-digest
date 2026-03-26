@@ -28,7 +28,8 @@ export interface RawItem {
 export interface ScoredItem extends RawItem {
   personalRelevance: number;     // 0-10
   publicInterest: number;        // 0-10
-  scoringRationale: string;
+  scoringRationale: string;      // personal-perspective rationale
+  publicRationale: string;       // public-perspective rationale
   commentAngle?: string;         // only when personalRelevance >= 7
 }
 
@@ -56,6 +57,7 @@ export interface DigestItemRow {
   personal_relevance: number;
   public_interest: number;
   scoring_rationale: string;
+  public_rationale: string | null;
   comment_angle: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;

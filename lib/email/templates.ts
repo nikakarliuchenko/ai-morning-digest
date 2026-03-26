@@ -86,7 +86,7 @@ function renderScoreBar(value: number, color: string): string {
   return `<span class="score-bar"><span class="score-fill" style="width:${pct}%;background:${color};"></span></span>`;
 }
 
-function renderItem(item: DigestItemRow, includeCommentAngle: boolean): string {
+function renderItem(item: DigestItemRow, includeCommentAngle: boolean, usePublicRationale = false): string {
   const badge = `<span class="source-badge" style="background:${sourceColor(item.source)};">${escapeHtml(sourceLabel(item.source))}</span>`;
   const meta: string[] = [];
   if (item.author) meta.push(escapeHtml(item.author));
@@ -96,7 +96,7 @@ function renderItem(item: DigestItemRow, includeCommentAngle: boolean): string {
   let html = `<div class="item">
   <div class="item-title">${badge} <a href="${escapeHtml(item.url)}">${escapeHtml(item.title)}</a></div>
   <div class="item-meta">${meta.join(' &middot; ')}</div>
-  <div class="rationale">${escapeHtml(item.scoring_rationale)}</div>`;
+  <div class="rationale">${escapeHtml(usePublicRationale ? (item.public_rationale ?? item.scoring_rationale) : item.scoring_rationale)}</div>`;
 
   if (includeCommentAngle && item.comment_angle) {
     html += `\n  <div class="comment-angle"><strong>Comment angle:</strong> ${escapeHtml(item.comment_angle)}</div>`;
@@ -130,12 +130,12 @@ export function publicDigestHtml(
 
   if (highlights.length > 0) {
     body += `\n  <div class="section-title">Highlights ${renderScoreBar(9, '#eab308')}</div>`;
-    body += highlights.map((i) => renderItem(i, false)).join('\n');
+    body += highlights.map((i) => renderItem(i, false, true)).join('\n');
   }
 
   if (notable.length > 0) {
     body += `\n  <div class="section-title" style="margin-top:16px;">Notable ${renderScoreBar(7, '#6366f1')}</div>`;
-    body += notable.map((i) => renderItem(i, false)).join('\n');
+    body += notable.map((i) => renderItem(i, false, true)).join('\n');
   }
 
   body += '\n</div>';
