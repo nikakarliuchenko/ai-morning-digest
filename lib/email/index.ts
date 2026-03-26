@@ -16,7 +16,7 @@ export async function sendPersonalDigest(
   date: string,
   items: DigestItemRow[],
 ): Promise<boolean> {
-  const html = personalDigestHtml(date, items);
+  const html = personalDigestHtml(date, items, YOUR_EMAIL);
 
   const { error } = await resend.emails.send({
     from: `AI Digest <${FROM}>`,
@@ -47,15 +47,10 @@ export async function sendPublicDigest(
     return { sent: true, subscriberCount: 0 };
   }
 
-  const baseHtml = publicDigestHtml(date, items);
-
   // Send individually so each subscriber gets their own unsubscribe link
   const results = await Promise.allSettled(
     subscribers.map((sub) => {
-      const html = baseHtml.replace(
-        '{{unsubscribe_url}}',
-        `${getBaseUrl()}/unsubscribe?email=${encodeURIComponent(sub.email)}`,
-      );
+      const html = publicDigestHtml(date, items, sub.email);
 
       return resend.emails.send({
         from: `AI Morning Digest <${FROM}>`,

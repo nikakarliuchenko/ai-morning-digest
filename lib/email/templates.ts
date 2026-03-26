@@ -111,6 +111,7 @@ function renderItem(item: DigestItemRow, includeCommentAngle: boolean, usePublic
 export function publicDigestHtml(
   date: string,
   items: DigestItemRow[],
+  email: string,
 ): string {
   const filtered = items.filter((i) => i.author !== 'ClaudeAI-mod-bot');
 
@@ -139,7 +140,8 @@ export function publicDigestHtml(
   }
 
   body += '\n</div>';
-  body += `\n<div class="footer">You received this because you subscribed to AI Morning Digest.<br><a href="{{unsubscribe_url}}">Unsubscribe</a></div>`;
+  const unsubUrl = `https://digest.fieldnotes-ai.com/unsubscribe?email=${encodeURIComponent(email)}`;
+  body += `\n<div class="footer">You received this because you subscribed to AI Morning Digest.<br><a href="${escapeHtml(unsubUrl)}" style="color:#a1a1aa;">Unsubscribe from this digest</a></div>`;
 
   const preheader =
     highlights.length > 0
@@ -157,6 +159,7 @@ export function publicDigestHtml(
 export function personalDigestHtml(
   date: string,
   items: DigestItemRow[],
+  email: string,
 ): string {
   const filtered = items.filter((i) => i.author !== 'ClaudeAI-mod-bot');
 
@@ -190,7 +193,8 @@ export function personalDigestHtml(
   }
 
   const stats = items.length;
-  body += `\n<div class="footer">Scanned ${stats} items across all sources.</div>`;
+  const unsubUrl = `https://digest.fieldnotes-ai.com/unsubscribe?email=${encodeURIComponent(email)}`;
+  body += `\n<div class="footer">Scanned ${stats} items across all sources.<br><a href="${escapeHtml(unsubUrl)}" style="color:#a1a1aa;">Unsubscribe from this digest</a></div>`;
 
   const preheader =
     personal.length > 0
