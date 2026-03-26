@@ -42,7 +42,7 @@ Total running cost: ~$0.25/day.
 | OpenAI blog | Official RSS | Free |
 | Google DeepMind | Official RSS | Free |
 | X / Twitter | SocialData.tools keyword search | ~$3/mo |
-| Exa | Semantic search API | ~$1/mo (pay-as-you-go, $10 free credit on signup) |
+| Exa | Semantic search API | ~$1/mo |
 
 ## Run it yourself
 
