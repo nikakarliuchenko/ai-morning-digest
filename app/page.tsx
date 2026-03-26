@@ -28,21 +28,6 @@ const SOURCE_COLORS: Record<string, string> = {
   rss_deepmind: 'bg-blue-600',
 };
 
-function ScoreBadge({ value }: { value: number }) {
-  const color =
-    value >= 8
-      ? 'text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-950'
-      : value >= 6
-        ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950'
-        : 'text-zinc-500 bg-zinc-100 dark:text-zinc-400 dark:bg-zinc-800';
-
-  return (
-    <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${color}`}>
-      {value}
-    </span>
-  );
-}
-
 function DigestItem({ item }: { item: DigestItemRow }) {
   const srcLabel = SOURCE_LABELS[item.source] ?? item.source;
   const srcColor = SOURCE_COLORS[item.source] ?? 'bg-zinc-500';
@@ -65,7 +50,6 @@ function DigestItem({ item }: { item: DigestItemRow }) {
         </a>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <ScoreBadge value={item.public_interest} />
         {item.author && (
           <span className="text-xs text-zinc-400">{item.author}</span>
         )}
