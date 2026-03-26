@@ -8,6 +8,7 @@ import {
   getDigestByDate,
 } from '@/lib/supabase/queries';
 import { sendDigestEmails } from '@/lib/email';
+import { deduplicateByTopic } from '@/lib/dedup';
 
 export async function runPipeline(date: string): Promise<PipelineResult> {
   console.log(`\n=== AI Morning Digest Pipeline: ${date} ===\n`);
@@ -36,10 +37,15 @@ export async function runPipeline(date: string): Promise<PipelineResult> {
       throw new Error('Scoring returned zero items');
     }
 
+    // 3b. Deduplicate by topic
+    console.log('\n[pipeline] deduplicating by topic...');
+    const deduplicated = deduplicateByTopic(scored);
+    console.log(`[pipeline] ${scored.length} → ${deduplicated.length} after topic dedup`);
+
     // 4. Persist to Supabase
     console.log('\n[pipeline] saving to database...');
-    await insertDigestItems(digest.id, scored);
-    await updateDigestStatus(digest.id, 'complete', scored.length);
+    await insertDigestItems(digest.id, deduplicated);
+    await updateDigestStatus(digest.id, 'complete', deduplicated.length);
 
     // 5. Fetch back from DB (gets DigestItemRow[] for email templates)
     const result = await getDigestByDate(date);
@@ -53,7 +59,7 @@ export async function runPipeline(date: string): Promise<PipelineResult> {
     const publicCount = result.items.filter((i) => i.public_interest >= 6).length;
 
     console.log(`\n=== Pipeline complete ===`);
-    console.log(`  Items: ${scored.length} scored`);
+    console.log(`  Items: ${scored.length} scored, ${deduplicated.length} after dedup`);
     console.log(`  Personal (>=7): ${personalCount}`);
     console.log(`  Public (>=6): ${publicCount}`);
     console.log(`  Emails: personal=${emails.personal}, public=${emails.public}, subscribers=${emails.subscriberCount}`);
@@ -61,7 +67,7 @@ export async function runPipeline(date: string): Promise<PipelineResult> {
     return {
       digestId: digest.id,
       date,
-      totalItems: scored.length,
+      totalItems: deduplicated.length,
       personalItems: personalCount,
       publicItems: publicCount,
       emailsSent: emails,

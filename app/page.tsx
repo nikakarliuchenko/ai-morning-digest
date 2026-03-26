@@ -79,7 +79,9 @@ function DigestItem({ item }: { item: DigestItemRow }) {
         )}
       </div>
       <p className="mt-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-        {item.scoring_rationale}
+        {item.scoring_rationale.length > 120
+          ? item.scoring_rationale.slice(0, 120) + '\u2026'
+          : item.scoring_rationale}
       </p>
     </div>
   );
@@ -116,6 +118,11 @@ export default async function DigestPage() {
   const notable = filtered
     .filter((i) => i.public_interest >= 6 && i.public_interest < 8)
     .sort((a, b) => b.public_interest - a.public_interest)
+    .reduce<DigestItemRow[]>((acc, item) => {
+      const count = acc.filter((a) => a.source === item.source).length;
+      if (count < 2) acc.push(item);
+      return acc;
+    }, [])
     .slice(0, 15);
 
   return (
@@ -129,6 +136,10 @@ export default async function DigestPage() {
             {digest.date} &middot; {digest.item_count} items scored
           </p>
         </header>
+
+        <p className="mb-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+          AI-curated news from Reddit, Hacker News, X, and tech blogs — scored daily by Claude.
+        </p>
 
         {highlights.length > 0 && (
           <section className="mb-8 rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
