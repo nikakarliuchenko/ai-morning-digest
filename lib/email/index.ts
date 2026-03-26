@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import type { DigestItemRow } from '@/types';
-import { getActiveSubscribers } from '@/lib/supabase/queries';
+import { getActiveSubscribers, getSubscriberByEmail } from '@/lib/supabase/queries';
 import { personalDigestHtml, publicDigestHtml } from './templates';
 
 // ---- Config ----
@@ -16,7 +16,8 @@ export async function sendPersonalDigest(
   date: string,
   items: DigestItemRow[],
 ): Promise<boolean> {
-  const html = personalDigestHtml(date, items, YOUR_EMAIL);
+  const sub = await getSubscriberByEmail(YOUR_EMAIL);
+  const html = personalDigestHtml(date, items, sub?.unsubscribe_token ?? '');
 
   const { error } = await resend.emails.send({
     from: `AI Digest <${FROM}>`,
@@ -50,7 +51,7 @@ export async function sendPublicDigest(
   // Send individually so each subscriber gets their own unsubscribe link
   const results = await Promise.allSettled(
     subscribers.map((sub) => {
-      const html = publicDigestHtml(date, items, sub.email);
+      const html = publicDigestHtml(date, items, sub.unsubscribe_token ?? '');
 
       return resend.emails.send({
         from: `AI Morning Digest <${FROM}>`,

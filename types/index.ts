@@ -68,6 +68,7 @@ export interface SubscriberRow {
   email: string;
   confirmed: boolean;
   confirm_token: string | null;
+  unsubscribe_token: string | null;
   created_at: string;
   unsubscribed_at: string | null;
 }

@@ -124,14 +124,26 @@ export async function getActiveSubscribers(): Promise<SubscriberRow[]> {
   return data ?? [];
 }
 
+export async function getSubscriberByEmail(email: string): Promise<SubscriberRow | null> {
+  const { data, error } = await db()
+    .from('subscribers')
+    .select()
+    .eq('email', email)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export async function addSubscriber(
   email: string,
 ): Promise<{ confirmToken: string }> {
   const confirmToken = crypto.randomUUID();
+  const unsubscribeToken = crypto.randomUUID();
   const { error } = await db()
     .from('subscribers')
     .upsert(
-      { email, confirmed: false, confirm_token: confirmToken },
+      { email, confirmed: false, confirm_token: confirmToken, unsubscribe_token: unsubscribeToken },
       { onConflict: 'email' },
     );
   if (error) throw error;
@@ -148,10 +160,13 @@ export async function confirmSubscriber(token: string): Promise<boolean> {
   return (data?.length ?? 0) > 0;
 }
 
-export async function unsubscribeByEmail(email: string): Promise<void> {
-  const { error } = await db()
+export async function unsubscribeByToken(token: string): Promise<boolean> {
+  const { data, error } = await db()
     .from('subscribers')
     .update({ unsubscribed_at: new Date().toISOString() })
-    .eq('email', email);
+    .eq('unsubscribe_token', token)
+    .is('unsubscribed_at', null)
+    .select();
   if (error) throw error;
+  return (data?.length ?? 0) > 0;
 }

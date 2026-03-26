@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { unsubscribeByEmail } from '@/lib/supabase/queries';
+import { unsubscribeByToken } from '@/lib/supabase/queries';
 
 export const metadata: Metadata = {
   title: 'Unsubscribe – AI Morning Digest',
@@ -8,19 +8,17 @@ export const metadata: Metadata = {
 export default async function UnsubscribePage({
   searchParams,
 }: {
-  searchParams: Promise<{ email?: string }>;
+  searchParams: Promise<{ token?: string }>;
 }) {
-  const { email } = await searchParams;
+  const { token } = await searchParams;
 
-  let message = 'No email address provided.';
+  let message = 'Invalid or missing unsubscribe link.';
 
-  if (email) {
-    try {
-      await unsubscribeByEmail(email);
-      message = "You've been unsubscribed. You won't receive any more digest emails.";
-    } catch {
-      message = 'Something went wrong. Please try again later.';
-    }
+  if (token) {
+    const ok = await unsubscribeByToken(token);
+    message = ok
+      ? "You've been unsubscribed. You won't receive any more digest emails."
+      : 'This link has already been used or is invalid.';
   }
 
   return (
