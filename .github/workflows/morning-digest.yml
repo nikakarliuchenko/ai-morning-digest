@@ -2,8 +2,8 @@ name: Morning Digest
 
 on:
   schedule:
-    # 8 AM EST = 13:00 UTC (EDT = 12:00 UTC, but cron uses fixed UTC)
-    - cron: '0 13 * * *'
+    # 8 AM EDT = 12:00 UTC
+    - cron: '0 12 * * *'
   workflow_dispatch: # manual trigger
 
 jobs:
