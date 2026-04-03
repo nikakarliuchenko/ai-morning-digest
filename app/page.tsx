@@ -3,10 +3,35 @@ import { getLatestDigest, getAllDigestDates } from '@/lib/supabase/queries';
 import { SubscribeForm } from './subscribe-form';
 import { DigestContent } from './digest-content';
 
-export const metadata: Metadata = {
-  title: 'AI Morning Digest',
-  description: 'Daily AI news scored by relevance and public interest.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const result = await getLatestDigest();
+  if (!result) {
+    return {
+      title: 'AI Morning Digest',
+      description: 'Daily AI news scored and curated by Claude.',
+    };
+  }
+
+  const { digest, items } = result;
+  const title = `AI Morning Digest – ${digest.date}`;
+  const description = `Daily AI news scored and curated by Claude. ${items.length} items from Reddit, Hacker News, X, and tech blogs.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: 'https://digest.fieldnotes-ai.com',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
+}
 
 export default async function DigestPage() {
   const [result, dates] = await Promise.all([

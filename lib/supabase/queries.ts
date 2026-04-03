@@ -122,6 +122,39 @@ export async function insertDigestItems(
   if (error) throw error;
 }
 
+// ---- Recent public items (for RSS) ----
+
+export async function getRecentPublicItems(
+  limit = 30,
+): Promise<(DigestItemRow & { digest_date: string })[]> {
+  // Fetch top items by public_interest from completed digests
+  const { data: digests, error: dErr } = await db()
+    .from('digests')
+    .select('id, date')
+    .eq('status', 'complete')
+    .order('date', { ascending: false })
+    .limit(7);
+  if (dErr) throw dErr;
+  if (!digests || digests.length === 0) return [];
+
+  const digestIds = digests.map((d) => d.id);
+  const dateMap = new Map(digests.map((d) => [d.id, d.date]));
+
+  const { data: items, error: iErr } = await db()
+    .from('digest_items')
+    .select()
+    .in('digest_id', digestIds)
+    .gte('public_interest', 6)
+    .order('public_interest', { ascending: false })
+    .limit(limit);
+  if (iErr) throw iErr;
+
+  return (items ?? []).map((item) => ({
+    ...item,
+    digest_date: dateMap.get(item.digest_id) ?? '',
+  }));
+}
+
 // ---- Subscribers ----
 
 export async function getActiveSubscribers(): Promise<SubscriberRow[]> {

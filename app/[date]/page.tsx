@@ -11,9 +11,28 @@ export async function generateMetadata({
   params: Promise<{ date: string }>;
 }): Promise<Metadata> {
   const { date } = await params;
+  const result = await getDigestByDate(date);
+
+  const itemCount = result?.items.length ?? 0;
+  const title = `AI Morning Digest – ${date}`;
+  const description = itemCount > 0
+    ? `Daily AI news scored and curated by Claude. ${itemCount} items from Reddit, Hacker News, X, and tech blogs.`
+    : `AI news digest for ${date}.`;
+
   return {
-    title: `AI Morning Digest — ${date}`,
-    description: `AI news digest for ${date}.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `https://digest.fieldnotes-ai.com/${date}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 
