@@ -10,7 +10,10 @@ import {
 import { sendDigestEmails } from '@/lib/email';
 import { deduplicateByTopic } from '@/lib/dedup';
 
-export async function runPipeline(date: string): Promise<PipelineResult> {
+export async function runPipeline(
+  date: string,
+  options?: { maxItems?: number },
+): Promise<PipelineResult> {
   console.log(`\n=== AI Morning Digest Pipeline: ${date} ===\n`);
 
   // 1. Create digest record
@@ -20,7 +23,7 @@ export async function runPipeline(date: string): Promise<PipelineResult> {
   try {
     // 2. Fetch from all sources
     console.log('\n[pipeline] fetching...');
-    const raw = await fetchAllSources();
+    const raw = await fetchAllSources(options?.maxItems);
 
     if (raw.length === 0) {
       await updateDigestStatus(digest.id, 'failed');

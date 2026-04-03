@@ -1,5 +1,30 @@
 import type { DigestItemRow } from '@/types';
 
+// ---- Confirmation email ----
+
+export function confirmationEmailHtml(email: string, confirmToken: string): string {
+  const confirmUrl = `https://digest.fieldnotes-ai.com/confirm?token=${encodeURIComponent(confirmToken)}`;
+
+  const body = `<div class="header">
+  <h1>AI Morning Digest</h1>
+  <p>Confirm your subscription</p>
+</div>
+<div class="card" style="text-align:center;">
+  <p style="font-size:15px;color:#3f3f46;line-height:1.5;margin:0 0 20px;">
+    You signed up for <strong>AI Morning Digest</strong> with <strong>${escapeHtml(email)}</strong>.
+    Please confirm your subscription by clicking the button below.
+  </p>
+  <a href="${escapeHtml(confirmUrl)}" style="display:inline-block;padding:12px 32px;background:#2563eb;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;border-radius:6px;">
+    Confirm subscription
+  </a>
+  <p style="margin-top:20px;font-size:12px;color:#a1a1aa;">
+    If you didn't sign up, you can safely ignore this email.
+  </p>
+</div>`;
+
+  return layout('Confirm your subscription – AI Morning Digest', 'Please confirm your subscription to AI Morning Digest', body);
+}
+
 // ---- Source display helpers ----
 
 const SOURCE_LABELS: Record<string, string> = {

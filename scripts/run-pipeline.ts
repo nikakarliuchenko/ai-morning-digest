@@ -8,9 +8,10 @@
 
 import { runPipeline } from '@/lib/pipeline';
 
-const date = process.argv[2] ?? new Date().toISOString().slice(0, 10);
+const isQuick = process.argv.includes('--quick');
+const date = process.argv.filter((a) => !a.startsWith('--'))[2] ?? new Date().toISOString().slice(0, 10);
 
-runPipeline(date)
+runPipeline(date, { maxItems: isQuick ? 50 : undefined })
   .then((result) => {
     console.log('\n' + JSON.stringify(result, null, 2));
     process.exit(0);

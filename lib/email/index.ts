@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import type { DigestItemRow } from '@/types';
 import { getActiveSubscribers, getSubscriberByEmail } from '@/lib/supabase/queries';
-import { personalDigestHtml, publicDigestHtml } from './templates';
+import { personalDigestHtml, publicDigestHtml, confirmationEmailHtml } from './templates';
 
 // ---- Config ----
 
@@ -22,6 +22,7 @@ export async function sendPersonalDigest(
   const { error } = await resend.emails.send({
     from: `AI Digest <${FROM}>`,
     to: YOUR_EMAIL,
+    replyTo: YOUR_EMAIL,
     subject: `Your AI Digest - ${date}`,
     html,
   });
@@ -56,6 +57,7 @@ export async function sendPublicDigest(
       return resend.emails.send({
         from: `AI Morning Digest <${FROM}>`,
         to: sub.email,
+        replyTo: YOUR_EMAIL,
         subject: `AI Morning Digest - ${date}`,
         html,
       });
@@ -71,6 +73,31 @@ export async function sendPublicDigest(
   console.log(`[email] public digest sent to ${succeeded}/${subscribers.length} subscribers`);
 
   return { sent: failed.length === 0, subscriberCount: succeeded };
+}
+
+// ---- Send confirmation email (to new subscriber) ----
+
+export async function sendConfirmationEmail(
+  email: string,
+  confirmToken: string,
+): Promise<boolean> {
+  const html = confirmationEmailHtml(email, confirmToken);
+
+  const { error } = await resend.emails.send({
+    from: `AI Morning Digest <${FROM}>`,
+    to: email,
+    replyTo: YOUR_EMAIL,
+    subject: 'Confirm your subscription – AI Morning Digest',
+    html,
+  });
+
+  if (error) {
+    console.error('[email] confirmation email failed:', error);
+    return false;
+  }
+
+  console.log(`[email] confirmation email sent to ${email}`);
+  return true;
 }
 
 // ---- Orchestrator: send both digests ----

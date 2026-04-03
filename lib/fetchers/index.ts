@@ -5,7 +5,7 @@ import { fetchRSSBlogs } from './rss-blogs';
 import { fetchTwitter } from './socialdata';
 import { fetchExa } from './exa';
 
-export async function fetchAllSources(): Promise<RawItem[]> {
+export async function fetchAllSources(maxItems?: number): Promise<RawItem[]> {
   const results = await Promise.allSettled([
     fetchReddit(),
     fetchHackerNews(),
@@ -27,7 +27,8 @@ export async function fetchAllSources(): Promise<RawItem[]> {
   });
 
   const deduped = deduplicateByUrl(all);
-  const capped = deduped.slice(0, 150);
+  const limit = maxItems ?? 150;
+  const capped = deduped.slice(0, limit);
   console.log(`[fetchers] total: ${all.length} raw → ${deduped.length} deduped → ${capped.length} capped`);
 
   return capped;

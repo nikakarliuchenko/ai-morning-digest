@@ -1,6 +1,7 @@
 'use server';
 
 import { addSubscriber } from '@/lib/supabase/queries';
+import { sendConfirmationEmail } from '@/lib/email';
 
 export async function subscribe(
   _prev: { message: string; ok: boolean },
@@ -13,8 +14,10 @@ export async function subscribe(
   }
 
   try {
-    await addSubscriber(email.trim().toLowerCase());
-    return { message: "Subscribed! You'll receive your first digest tomorrow morning.", ok: true };
+    const normalizedEmail = email.trim().toLowerCase();
+    const { confirmToken } = await addSubscriber(normalizedEmail);
+    await sendConfirmationEmail(normalizedEmail, confirmToken);
+    return { message: 'Check your inbox — we sent you a confirmation email.', ok: true };
   } catch {
     return { message: 'Something went wrong. Please try again.', ok: false };
   }
