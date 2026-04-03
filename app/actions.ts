@@ -14,7 +14,7 @@ export async function subscribe(
 
   try {
     await addSubscriber(email.trim().toLowerCase());
-    return { message: 'Subscribed! You'll receive your first digest tomorrow morning.', ok: true };
+    return { message: "Subscribed! You'll receive your first digest tomorrow morning.", ok: true };
   } catch {
     return { message: 'Something went wrong. Please try again.', ok: false };
   }

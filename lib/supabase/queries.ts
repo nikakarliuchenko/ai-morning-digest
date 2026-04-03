@@ -71,6 +71,16 @@ export async function getLatestDigest(): Promise<{
   return { digest, items: items ?? [] };
 }
 
+export async function getAllDigestDates(): Promise<string[]> {
+  const { data, error } = await db()
+    .from('digests')
+    .select('date')
+    .eq('status', 'complete')
+    .order('date', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((r) => r.date);
+}
+
 // ---- Digest Items ----
 
 export async function insertDigestItems(
