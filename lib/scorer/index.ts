@@ -32,6 +32,12 @@ PUBLIC_INTEREST (0-10): How interesting to any developer building with AI?
   1-3: Niche or low-signal
   0: Spam
 
+== ENGAGEMENT SIGNALS ==
+Items include Upvotes and Comments counts when available. Use them as a soft signal:
+- Low engagement (under 10 upvotes AND under 5 comments) should lower public_interest by 1-2 points UNLESS the content is from an official/authoritative source (e.g. Anthropic blog, OpenAI blog, HN front page, official documentation, major tech company announcements).
+- High engagement (100+ upvotes or 50+ comments) is a positive signal for public_interest.
+- Missing engagement data (no Upvotes/Comments fields) should be treated as neutral — do not penalize.
+
 == SHARED GUIDANCE ==
 Score higher for: actionable today, practitioner-specific, early signal on emerging tools, honest trade-off discussions.
 Score lower for: funding news, generic opinion pieces, hype without substance.
