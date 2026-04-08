@@ -3,6 +3,8 @@ import { getLatestDigest, getAllDigestDates } from '@/lib/supabase/queries';
 import { SubscribeForm } from './subscribe-form';
 import { DigestContent } from './digest-content';
 
+export const revalidate = 300;
+
 export async function generateMetadata(): Promise<Metadata> {
   const result = await getLatestDigest();
   if (!result) {
